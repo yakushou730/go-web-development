@@ -1,1 +1,14 @@
 <h1>Hello, {{.Name}}!</h1>
+<h2>Wow, your phone is {{.Phone}}</h2>
+{{range  $item := .Points}}
+<h3>Your points are {{$item}}</h3>
+{{end}}
+{{ range $key, $value := .Mapping }}
+<h4>Key is {{$key}}, Value is {{$value}}</h4>
+{{end}}
+
+{{if true}}
+    <p>Display for if true condition</p>
+{{else}}
+    <p>Hide for else condition</p>
+{{end}}
