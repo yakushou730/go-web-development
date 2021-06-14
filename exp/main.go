@@ -10,7 +10,7 @@ import (
 const (
 	host     = "localhost"
 	port     = 5432
-	user     = "postgres"
+	user     = "TsengYaoShang"
 	password = ""
 	dbname   = "go_web_dev"
 )
@@ -56,5 +56,37 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Successfully connected!")
+
+	// _, err = db.Exec(`
+	// 	INSERT INTO users(name, email)
+	// 	VALUES($1, $2)`, "Shou", "yakushou730@gmail.com")
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	var id int
+	row := db.QueryRow(`
+		INSERT INTO users(name, email)
+		VALUES($1, $2) RETURNING id`,
+		"shou", "yakushou730@gmail.com")
+	err = row.Scan(&id)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(id)
+
 	db.Close()
 }
+
+// CREATE TABLE users (
+// id SERIAL PRIMARY KEY,
+// name TEXT,
+// email TEXT NOT NULL
+// );
+//
+// CREATE TABLE orders (
+// id SERIAL PRIMARY KEY,
+// user_id INT NOT NULL,
+// amount INT,
+// description TEXT
+// );
