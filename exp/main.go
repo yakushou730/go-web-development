@@ -19,6 +19,7 @@ const (
 type User struct {
 	gorm.Model
 	Name  string
+	Age   int
 	Email string `gorm:"not null;unique index"`
 }
 
@@ -60,6 +61,7 @@ func main() {
 	}
 	defer db.Close()
 
+	db.LogMode(true)
 	db.AutoMigrate(&User{})
 
 	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
