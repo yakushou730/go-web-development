@@ -16,6 +16,12 @@ const (
 	dbname   = "go_web_dev"
 )
 
+type User struct {
+	gorm.Model
+	Name  string
+	Email string `gorm:"not null;unique index"`
+}
+
 // func main() {
 // 	t, err := template.ParseFiles("hello.gohtml")
 // 	if err != nil {
