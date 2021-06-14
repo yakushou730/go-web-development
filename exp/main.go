@@ -64,16 +64,28 @@ func main() {
 	// 	panic(err)
 	// }
 
+	// var id int
+	// row := db.QueryRow(`
+	// 	INSERT INTO users(name, email)
+	// 	VALUES($1, $2) RETURNING id`,
+	// 	"shou", "yakushou730@gmail.com")
+	// err = row.Scan(&id)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(id)
+
 	var id int
+	var name, email string
 	row := db.QueryRow(`
-		INSERT INTO users(name, email)
-		VALUES($1, $2) RETURNING id`,
-		"shou", "yakushou730@gmail.com")
-	err = row.Scan(&id)
+		SELECT id, name, email
+		FROM users
+		WHERE id=$1`, 1)
+	err = row.Scan(&id, &name, &email)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(id)
+	fmt.Println("ID:", id, "Name:", name, "Email:", email)
 
 	db.Close()
 }
