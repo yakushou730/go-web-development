@@ -60,6 +60,8 @@ func main() {
 	}
 	defer db.Close()
 
+	db.AutoMigrate(&User{})
+
 	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 	// 	"dbname=%s sslmode=disable",
 	// 	host, port, user, dbname)
