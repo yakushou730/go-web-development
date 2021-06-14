@@ -1,6 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"os"
+	"strings"
+
 	// "database/sql"
 	"fmt"
 
@@ -63,6 +67,18 @@ func main() {
 
 	db.LogMode(true)
 	db.AutoMigrate(&User{})
+
+	name, email := getInfo()
+
+	u := &User{
+		Name:  name,
+		Email: email,
+	}
+
+	if err = db.Create(u).Error; err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", u)
 
 	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 	// 	"dbname=%s sslmode=disable",
@@ -146,3 +162,14 @@ func main() {
 // amount INT,
 // description TEXT
 // );
+
+func getInfo() (name, email string) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("What is your name?")
+	name, _ = reader.ReadString('\n')
+	name = strings.TrimSpace(name)
+	fmt.Println("What is your email?")
+	email, _ = reader.ReadString('\n')
+	email = strings.TrimSpace(email)
+	return name, email
+}
