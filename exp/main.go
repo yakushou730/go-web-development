@@ -77,16 +77,18 @@ func main() {
 
 	var id int
 	var name, email string
-	row := db.QueryRow(`
+	rows, err := db.Query(`
 		SELECT id, name, email
 		FROM users
-		WHERE id=$1`, 1)
-	err = row.Scan(&id, &name, &email)
+		WHERE email=$1
+		OR ID > $2`, "yakushou730@gmail.com", 3)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("ID:", id, "Name:", name, "Email:", email)
-
+	for rows.Next() {
+		rows.Scan(&id, &name, &email)
+		fmt.Println("ID:", id, "Name:", name, "Email:", email)
+	}
 	db.Close()
 }
 
