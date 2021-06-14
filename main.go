@@ -17,6 +17,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 func main() {
 	usersC := controllers.NewUsers()
 	staticC := controllers.NewStatic()
+	galleriesC := controllers.NewGalleries()
 
 	r := mux.NewRouter()
 	r.Handle("/", staticC.Home).Methods(http.MethodGet)
@@ -24,6 +25,7 @@ func main() {
 	r.Handle("/faq", staticC.Faq).Methods(http.MethodGet)
 	r.HandleFunc("/signup", usersC.New).Methods(http.MethodGet)
 	r.HandleFunc("/signup", usersC.Create).Methods(http.MethodPost)
+	r.HandleFunc("/galleries/new", galleriesC.New).Methods(http.MethodGet)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
