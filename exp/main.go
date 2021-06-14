@@ -1,33 +1,60 @@
 package main
 
 import (
-	"html/template"
-	"os"
+	"database/sql"
+	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = ""
+	dbname   = "go_web_dev"
+)
+
+// func main() {
+// 	t, err := template.ParseFiles("hello.gohtml")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+//
+// 	data := struct {
+// 		Name    string
+// 		Phone   string
+// 		Points  []int
+// 		Mapping map[string]string
+// 	}{
+// 		Name:   "<script>alert('Howdy!')</script>",
+// 		Phone:  "3345678",
+// 		Points: []int{1, 2, 3, 4, 5},
+// 		Mapping: map[string]string{
+// 			"A": "100",
+// 			"B": "200",
+// 		},
+// 	}
+//
+// 	err = t.Execute(os.Stdout, data)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
+
 func main() {
-	t, err := template.ParseFiles("hello.gohtml")
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"dbname=%s sslmode=disable",
+		host, port, user, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+
 	if err != nil {
 		panic(err)
 	}
-
-	data := struct {
-		Name    string
-		Phone   string
-		Points  []int
-		Mapping map[string]string
-	}{
-		Name:   "<script>alert('Howdy!')</script>",
-		Phone:  "3345678",
-		Points: []int{1, 2, 3, 4, 5},
-		Mapping: map[string]string{
-			"A": "100",
-			"B": "200",
-		},
-	}
-
-	err = t.Execute(os.Stdout, data)
+	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Successfully connected!")
+	db.Close()
 }
