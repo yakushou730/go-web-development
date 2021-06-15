@@ -27,6 +27,24 @@ type User struct {
 	Email string `gorm:"not null;unique index"`
 }
 
+type Order struct {
+	gorm.Model
+	UserID      uint
+	Amount      int
+	Description string
+}
+
+func CreateOrder(db *gorm.DB, user User, amount int, desc string) {
+	db.Create(&Order{
+		UserID:      user.ID,
+		Amount:      amount,
+		Description: desc,
+	})
+	if db.Error != nil {
+		panic(db.Error)
+	}
+}
+
 // func main() {
 // 	t, err := template.ParseFiles("hello.gohtml")
 // 	if err != nil {
@@ -66,19 +84,28 @@ func main() {
 	defer db.Close()
 
 	db.LogMode(true)
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&User{}, &Order{})
 
-	name, email := getInfo()
-
-	u := &User{
-		Name:  name,
-		Email: email,
+	var user User
+	db.First(&user)
+	if db.Error != nil {
+		panic(db.Error)
 	}
+	CreateOrder(db, user, 1001, "Fake Description #1")
+	CreateOrder(db, user, 9999, "Fake Description #2")
+	CreateOrder(db, user, 8800, "Fake Description #3")
 
-	if err = db.Create(u).Error; err != nil {
-		panic(err)
-	}
-	fmt.Printf("%+v\n", u)
+	// name, email := getInfo()
+	//
+	// u := &User{
+	// 	Name:  name,
+	// 	Email: email,
+	// }
+	//
+	// if err = db.Create(u).Error; err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("%+v\n", u)
 
 	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 	// 	"dbname=%s sslmode=disable",
