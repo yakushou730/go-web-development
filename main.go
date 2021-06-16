@@ -4,9 +4,19 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/yakushou730/go-web-development/models"
+
 	"github.com/yakushou730/go-web-development/controllers"
 
 	"github.com/gorilla/mux"
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "TsengYaoShang"
+	password = ""
+	dbname   = "go_web_dev"
 )
 
 func notFound(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +25,17 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"dbname=%s sslmode=disable",
+		host, port, user, dbname)
+
+	us, err := models.NewUserService(psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer us.Close()
+	us.AutoMigrate()
+
 	usersC := controllers.NewUsers()
 	staticC := controllers.NewStatic()
 
