@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"os"
-	"strings"
 
 	// "database/sql"
 	"fmt"
+
+	"github.com/yakushou730/go-web-development/models"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -77,24 +76,30 @@ func main() {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"dbname=%s sslmode=disable",
 		host, port, user, dbname)
-	db, err := gorm.Open("postgres", psqlInfo)
-
+	us, err := models.NewUserService(psqlInfo)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer us.Close()
+	us.DestructiveReset()
 
-	db.LogMode(true)
-	db.AutoMigrate(&User{}, &Order{})
-
-	var user User
-	db.Preload("Orders").First(&user)
-	if db.Error != nil {
-		panic(db.Error)
+	user, err := us.ByID(1)
+	if err != nil {
+		panic(err)
 	}
-	fmt.Println("Email:", user.Email)
-	fmt.Println("Number of orders:", len(user.Orders))
-	fmt.Println("Orders:", user.Orders)
+	fmt.Println(user)
+
+	// db.LogMode(true)
+	// db.AutoMigrate(&User{}, &Order{})
+	//
+	// var user User
+	// db.Preload("Orders").First(&user)
+	// if db.Error != nil {
+	// 	panic(db.Error)
+	// }
+	// fmt.Println("Email:", user.Email)
+	// fmt.Println("Number of orders:", len(user.Orders))
+	// fmt.Println("Orders:", user.Orders)
 
 	// var user User
 	// db.First(&user)
@@ -200,13 +205,13 @@ func main() {
 // description TEXT
 // );
 
-func getInfo() (name, email string) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("What is your name?")
-	name, _ = reader.ReadString('\n')
-	name = strings.TrimSpace(name)
-	fmt.Println("What is your email?")
-	email, _ = reader.ReadString('\n')
-	email = strings.TrimSpace(email)
-	return name, email
-}
+// func getInfo() (name, email string) {
+// 	reader := bufio.NewReader(os.Stdin)
+// 	fmt.Println("What is your name?")
+// 	name, _ = reader.ReadString('\n')
+// 	name = strings.TrimSpace(name)
+// 	fmt.Println("What is your email?")
+// 	email, _ = reader.ReadString('\n')
+// 	email = strings.TrimSpace(email)
+// 	return name, email
+// }
