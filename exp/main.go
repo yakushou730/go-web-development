@@ -91,7 +91,7 @@ func main() {
 		panic(err)
 	}
 
-	foundUser, err := us.ByID(1)
+	foundUser, err := us.ByEmail("yakushou730@gmail.com")
 	if err != nil {
 		panic(err)
 	}
