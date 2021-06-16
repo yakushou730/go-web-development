@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("models: resource not found")
+	ErrNotFound  = errors.New("models: resource not found")
+	ErrInvalidID = errors.New("models: ID provided was invalid")
 )
 
 type User struct {
@@ -63,6 +64,18 @@ func (us *UserService) DestructiveReset() {
 
 func (us *UserService) Create(user *User) error {
 	return us.db.Create(user).Error
+}
+
+func (us *UserService) Update(user *User) error {
+	return us.db.Save(&user).Error
+}
+
+func (us *UserService) Delete(id uint) error {
+	if id == 0 {
+		return ErrInvalidID
+	}
+	user := User{Model: gorm.Model{ID: id}}
+	return us.db.Delete(&user).Error
 }
 
 func first(db *gorm.DB, dst interface{}) error {

@@ -91,6 +91,15 @@ func main() {
 		panic(err)
 	}
 
+	user.Name = "Updated Name"
+	if err := us.Update(&user); err != nil {
+		panic(err)
+	}
+
+	if err := us.Delete(user.ID); err != nil {
+		panic(err)
+	}
+
 	foundUser, err := us.ByEmail("yakushou730@gmail.com")
 	if err != nil {
 		panic(err)
