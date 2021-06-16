@@ -83,11 +83,19 @@ func main() {
 	defer us.Close()
 	us.DestructiveReset()
 
-	user, err := us.ByID(1)
+	user := models.User{
+		Name:  "Shou",
+		Email: "yakushou730@gmail.com",
+	}
+	if err := us.Create(&user); err != nil {
+		panic(err)
+	}
+
+	foundUser, err := us.ByID(1)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(user)
+	fmt.Println(foundUser)
 
 	// db.LogMode(true)
 	// db.AutoMigrate(&User{}, &Order{})

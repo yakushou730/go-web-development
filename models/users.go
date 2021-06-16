@@ -53,3 +53,7 @@ func (us *UserService) DestructiveReset() {
 	us.db.DropTableIfExists(&User{})
 	us.db.AutoMigrate(&User{})
 }
+
+func (us *UserService) Create(user *User) error {
+	return us.db.Create(user).Error
+}
