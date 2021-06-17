@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/yakushou730/go-web-development/models"
+
 	"github.com/yakushou730/go-web-development/views"
 )
 
@@ -13,14 +15,16 @@ type SignupForm struct {
 	Password string `schema:"password"`
 }
 
-func NewUsers() *Users {
+func NewUsers(us *models.UserService) *Users {
 	return &Users{
 		NewView: views.NewView("bootstrap", "users/new"),
+		us:      us,
 	}
 }
 
 type Users struct {
 	NewView *views.View
+	us      *models.UserService
 }
 
 // GET /signup
@@ -37,7 +41,13 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fmt.Fprintln(w, form.Name)
-	fmt.Fprintln(w, form.Email)
-	fmt.Fprintln(w, form.Password)
+	user := models.User{
+		Name:  form.Name,
+		Email: form.Email,
+	}
+	if err := u.us.Create(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintln(w, "User is ", user)
 }
