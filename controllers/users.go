@@ -12,6 +12,7 @@ import (
 type SignupForm struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
+	Age      int    `schema:"age"`
 	Password string `schema:"password"`
 }
 
@@ -44,6 +45,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	user := models.User{
 		Name:  form.Name,
 		Email: form.Email,
+		Age:   form.Age,
 	}
 	if err := u.us.Create(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

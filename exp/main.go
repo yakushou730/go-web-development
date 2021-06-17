@@ -92,19 +92,42 @@ func main() {
 	}
 
 	user.Name = "Updated Name"
+	user.Age = 8
 	if err := us.Update(&user); err != nil {
 		panic(err)
 	}
 
-	if err := us.Delete(user.ID); err != nil {
+	user = models.User{
+		Name:  "Shou",
+		Email: "yakushou730+1@gmail.com",
+	}
+	if err := us.Create(&user); err != nil {
 		panic(err)
 	}
 
-	foundUser, err := us.ByEmail("yakushou730@gmail.com")
+	user.Name = "Updated Name la"
+	user.Age = 10
+	if err := us.Update(&user); err != nil {
+		panic(err)
+	}
+
+	// if err := us.Delete(user.ID); err != nil {
+	// 	panic(err)
+	// }
+
+	foundUser, err := us.ByAge(8)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(foundUser)
+
+	foundUsers, err := us.InAgeRange(0, 100)
+	if err != nil {
+		panic(err)
+	}
+	for _, user := range foundUsers {
+		fmt.Println(user)
+	}
 
 	// db.LogMode(true)
 	// db.AutoMigrate(&User{}, &Order{})

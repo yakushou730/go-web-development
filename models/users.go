@@ -16,6 +16,7 @@ type User struct {
 	gorm.Model
 	Name  string
 	Email string `gorm:"not null;unique_index"`
+	Age   int
 }
 
 type UserService struct {
@@ -45,6 +46,23 @@ func (us *UserService) ByID(id uint) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (us *UserService) ByAge(age int) (*User, error) {
+	var user User
+	db := us.db.Where("age = ?", age)
+	err := first(db, &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, err
+}
+
+func (us *UserService) InAgeRange(ageStart int, ageEnd int) ([]User, error) {
+	var users []User
+	db := us.db.Where("age BETWEEN ? AND ?", ageStart, ageEnd)
+	db.Find(&users)
+	return users, nil
 }
 
 func (us *UserService) ByEmail(email string) (*User, error) {
