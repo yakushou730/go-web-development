@@ -12,6 +12,7 @@ import (
 var (
 	ErrNotFound  = errors.New("models: resource not found")
 	ErrInvalidID = errors.New("models: ID provided was invalid")
+	userPwPepper = "secret-random-string"
 )
 
 type User struct {
@@ -88,7 +89,8 @@ func (us *UserService) DestructiveReset() error {
 }
 
 func (us *UserService) Create(user *User) error {
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	pwBytes := []byte(user.Password + userPwPepper)
+	hashedBytes, err := bcrypt.GenerateFromPassword(pwBytes, bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
