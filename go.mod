@@ -13,5 +13,5 @@ require (
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/pilu/config v0.0.0-20131214182432-3eb99e6c0b9a // indirect
 	github.com/pilu/fresh v0.0.0-20190826141211-0fa698148017 // indirect
-	golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 // indirect
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
 )

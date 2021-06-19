@@ -3,6 +3,8 @@ package models
 import (
 	"errors"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -86,6 +88,12 @@ func (us *UserService) DestructiveReset() error {
 }
 
 func (us *UserService) Create(user *User) error {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(hashedBytes)
+	user.Password = ""
 	return us.db.Create(user).Error
 }
 
