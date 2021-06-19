@@ -3,12 +3,12 @@ package main
 import (
 
 	// "database/sql"
-	"fmt"
 
-	"github.com/yakushou730/go-web-development/models"
+	"fmt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
+	"github.com/yakushou730/go-web-development/rand"
 )
 
 const (
@@ -73,61 +73,64 @@ func CreateOrder(db *gorm.DB, user User, amount int, desc string) {
 // }
 
 func main() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"dbname=%s sslmode=disable",
-		host, port, user, dbname)
-	us, err := models.NewUserService(psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-	defer us.Close()
-	us.DestructiveReset()
+	fmt.Println(rand.String(10))
+	fmt.Println(rand.RememberToken())
 
-	user := models.User{
-		Name:  "Shou",
-		Email: "yakushou730@gmail.com",
-	}
-	if err := us.Create(&user); err != nil {
-		panic(err)
-	}
-
-	user.Name = "Updated Name"
-	user.Age = 8
-	if err := us.Update(&user); err != nil {
-		panic(err)
-	}
-
-	user = models.User{
-		Name:  "Shou",
-		Email: "yakushou730+1@gmail.com",
-	}
-	if err := us.Create(&user); err != nil {
-		panic(err)
-	}
-
-	user.Name = "Updated Name la"
-	user.Age = 10
-	if err := us.Update(&user); err != nil {
-		panic(err)
-	}
+	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	// 	"dbname=%s sslmode=disable",
+	// 	host, port, user, dbname)
+	// us, err := models.NewUserService(psqlInfo)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer us.Close()
+	// us.DestructiveReset()
+	//
+	// user := models.User{
+	// 	Name:  "Shou",
+	// 	Email: "yakushou730@gmail.com",
+	// }
+	// if err := us.Create(&user); err != nil {
+	// 	panic(err)
+	// }
+	//
+	// user.Name = "Updated Name"
+	// user.Age = 8
+	// if err := us.Update(&user); err != nil {
+	// 	panic(err)
+	// }
+	//
+	// user = models.User{
+	// 	Name:  "Shou",
+	// 	Email: "yakushou730+1@gmail.com",
+	// }
+	// if err := us.Create(&user); err != nil {
+	// 	panic(err)
+	// }
+	//
+	// user.Name = "Updated Name la"
+	// user.Age = 10
+	// if err := us.Update(&user); err != nil {
+	// 	panic(err)
+	// }
 
 	// if err := us.Delete(user.ID); err != nil {
 	// 	panic(err)
 	// }
 
-	foundUser, err := us.ByAge(8)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(foundUser)
-
-	foundUsers, err := us.InAgeRange(0, 100)
-	if err != nil {
-		panic(err)
-	}
-	for _, user := range foundUsers {
-		fmt.Println(user)
-	}
+	// foundUser, err := us.ByAge(8)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(foundUser)
+	//
+	// foundUsers, err := us.InAgeRange(0, 100)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// for _, user := range foundUsers {
+	// 	fmt.Println(user)
+	// }
 
 	// db.LogMode(true)
 	// db.AutoMigrate(&User{}, &Order{})
