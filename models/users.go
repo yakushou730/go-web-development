@@ -14,9 +14,11 @@ var (
 
 type User struct {
 	gorm.Model
-	Name  string
-	Email string `gorm:"not null;unique_index"`
-	Age   int
+	Name         string
+	Email        string `gorm:"not null;unique_index"`
+	Age          int
+	Password     string `gorm:"-"`
+	PasswordHash string `gorm:"not null"`
 }
 
 type UserService struct {
