@@ -104,12 +104,12 @@ func (u *Users) CookieTest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	user, err := u.us.ByRemember(cookie.Value)
+	_, err = u.us.ByRemember(cookie.Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintln(w, user)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (u *Users) SignIn(w http.ResponseWriter, user *models.User) error {
