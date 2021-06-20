@@ -3,12 +3,18 @@ package models
 import (
 	"errors"
 
+	"github.com/yakushou730/go-web-development/hash"
+
 	"github.com/yakushou730/go-web-development/rand"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+)
+
+const (
+	hmacSecretKey = "secret-hmac-key"
 )
 
 var (
@@ -30,7 +36,8 @@ type User struct {
 }
 
 type UserService struct {
-	db *gorm.DB
+	db   *gorm.DB
+	hmac hash.HMAC
 }
 
 func NewUserService(connectionInfo string) (*UserService, error) {
@@ -39,8 +46,10 @@ func NewUserService(connectionInfo string) (*UserService, error) {
 		return nil, err
 	}
 	db.LogMode(true)
+	hmac := hash.NewHMAC(hmacSecretKey)
 	return &UserService{
-		db: db,
+		db:   db,
+		hmac: hmac,
 	}, nil
 }
 
