@@ -24,6 +24,30 @@ var (
 	userPwPepper       = "secret-random-string"
 )
 
+type UserDB interface {
+	ByID(id uint) (*User, error)
+	ByEmail(email string) (*User, error)
+	ByRemember(token string) (*User, error)
+	ByAge(age int) (*User, error)
+	InAgeRange(ageStart int, ageEnd int) ([]User, error)
+
+	Create(user *User) error
+	Update(user *User) error
+	Delete(id uint) error
+
+	Close() error
+	DestructiveReset() error
+}
+
+type userValidator struct {
+	UserDB
+}
+
+type userGorm struct {
+	db   *gorm.DB
+	hmac hash.HMAC
+}
+
 type User struct {
 	gorm.Model
 	Name         string
@@ -36,30 +60,41 @@ type User struct {
 }
 
 type UserService struct {
-	db   *gorm.DB
-	hmac hash.HMAC
+	UserDB
 }
 
-func NewUserService(connectionInfo string) (*UserService, error) {
+func newUserGorm(connectionInfo string) (*userGorm, error) {
 	db, err := gorm.Open("postgres", connectionInfo)
 	if err != nil {
 		return nil, err
 	}
 	db.LogMode(true)
 	hmac := hash.NewHMAC(hmacSecretKey)
-	return &UserService{
+	return &userGorm{
 		db:   db,
 		hmac: hmac,
 	}, nil
 }
 
-func (us *UserService) Close() error {
-	return us.db.Close()
+func NewUserService(connectionInfo string) (*UserService, error) {
+	ug, err := newUserGorm(connectionInfo)
+	if err != nil {
+		return nil, err
+	}
+	return &UserService{
+		UserDB: &userValidator{
+			UserDB: ug,
+		},
+	}, nil
 }
 
-func (us *UserService) ByID(id uint) (*User, error) {
+func (ug *userGorm) Close() error {
+	return ug.db.Close()
+}
+
+func (ug *userGorm) ByID(id uint) (*User, error) {
 	var user User
-	db := us.db.Where("id = ?", id)
+	db := ug.db.Where("id = ?", id)
 	err := first(db, &user)
 	if err != nil {
 		return nil, err
@@ -67,9 +102,9 @@ func (us *UserService) ByID(id uint) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserService) ByAge(age int) (*User, error) {
+func (ug *userGorm) ByAge(age int) (*User, error) {
 	var user User
-	db := us.db.Where("age = ?", age)
+	db := ug.db.Where("age = ?", age)
 	err := first(db, &user)
 	if err != nil {
 		return nil, err
@@ -77,16 +112,16 @@ func (us *UserService) ByAge(age int) (*User, error) {
 	return &user, err
 }
 
-func (us *UserService) InAgeRange(ageStart int, ageEnd int) ([]User, error) {
+func (ug *userGorm) InAgeRange(ageStart int, ageEnd int) ([]User, error) {
 	var users []User
-	db := us.db.Where("age BETWEEN ? AND ?", ageStart, ageEnd)
+	db := ug.db.Where("age BETWEEN ? AND ?", ageStart, ageEnd)
 	db.Find(&users)
 	return users, nil
 }
 
-func (us *UserService) ByEmail(email string) (*User, error) {
+func (ug *userGorm) ByEmail(email string) (*User, error) {
 	var user User
-	db := us.db.Where("email = ?", email)
+	db := ug.db.Where("email = ?", email)
 	err := first(db, &user)
 	if err != nil {
 		return nil, err
@@ -94,25 +129,25 @@ func (us *UserService) ByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserService) ByRemember(token string) (*User, error) {
+func (ug *userGorm) ByRemember(token string) (*User, error) {
 	var user User
-	rememberHash := us.hmac.Hash(token)
-	err := first(us.db.Where("remember_hash = ?", rememberHash), &user)
+	rememberHash := ug.hmac.Hash(token)
+	err := first(ug.db.Where("remember_hash = ?", rememberHash), &user)
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (us *UserService) DestructiveReset() error {
-	err := us.db.DropTableIfExists(&User{}).Error
+func (ug *userGorm) DestructiveReset() error {
+	err := ug.db.DropTableIfExists(&User{}).Error
 	if err != nil {
 		return err
 	}
-	return us.AutoMigrate()
+	return ug.AutoMigrate()
 }
 
-func (us *UserService) Create(user *User) error {
+func (ug *userGorm) Create(user *User) error {
 	pwBytes := []byte(user.Password + userPwPepper)
 	hashedBytes, err := bcrypt.GenerateFromPassword(pwBytes, bcrypt.DefaultCost)
 	if err != nil {
@@ -128,29 +163,29 @@ func (us *UserService) Create(user *User) error {
 		}
 		user.Remember = token
 	}
-	user.RememberHash = us.hmac.Hash(user.Remember)
+	user.RememberHash = ug.hmac.Hash(user.Remember)
 
-	return us.db.Create(user).Error
+	return ug.db.Create(user).Error
 }
 
-func (us *UserService) Update(user *User) error {
+func (ug *userGorm) Update(user *User) error {
 	if user.Remember != "" {
-		user.RememberHash = us.hmac.Hash(user.Remember)
+		user.RememberHash = ug.hmac.Hash(user.Remember)
 	}
 
-	return us.db.Save(&user).Error
+	return ug.db.Save(&user).Error
 }
 
-func (us *UserService) Delete(id uint) error {
+func (ug *userGorm) Delete(id uint) error {
 	if id == 0 {
 		return ErrInvalidID
 	}
 	user := User{Model: gorm.Model{ID: id}}
-	return us.db.Delete(&user).Error
+	return ug.db.Delete(&user).Error
 }
 
-func (us *UserService) AutoMigrate() error {
-	if err := us.db.AutoMigrate(&User{}).Error; err != nil {
+func (ug *userGorm) AutoMigrate() error {
+	if err := ug.db.AutoMigrate(&User{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -180,4 +215,11 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	default:
 		return nil, err
 	}
+}
+
+func (uv *userValidator) ByID(id uint) (*User, error) {
+	if id <= 0 {
+		return nil, errors.New("Invalid ID")
+	}
+	return uv.UserDB.ByID(id)
 }
