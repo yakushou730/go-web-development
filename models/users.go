@@ -24,6 +24,11 @@ var (
 	userPwPepper       = "secret-random-string"
 )
 
+type UserService interface {
+	Authenticate(email, password string) (*User, error)
+	UserDB
+}
+
 type UserDB interface {
 	ByID(id uint) (*User, error)
 	ByEmail(email string) (*User, error)
@@ -37,6 +42,7 @@ type UserDB interface {
 
 	Close() error
 	DestructiveReset() error
+	AutoMigrate() error
 }
 
 type userValidator struct {
@@ -48,6 +54,10 @@ type userGorm struct {
 	hmac hash.HMAC
 }
 
+type userService struct {
+	UserDB
+}
+
 type User struct {
 	gorm.Model
 	Name         string
@@ -57,10 +67,6 @@ type User struct {
 	PasswordHash string `gorm:"not null"`
 	Remember     string `gorm:"-"`
 	RememberHash string `gorm:"not null;unique_index"`
-}
-
-type UserService struct {
-	UserDB
 }
 
 func newUserGorm(connectionInfo string) (*userGorm, error) {
@@ -76,12 +82,12 @@ func newUserGorm(connectionInfo string) (*userGorm, error) {
 	}, nil
 }
 
-func NewUserService(connectionInfo string) (*UserService, error) {
+func NewUserService(connectionInfo string) (UserService, error) {
 	ug, err := newUserGorm(connectionInfo)
 	if err != nil {
 		return nil, err
 	}
-	return &UserService{
+	return &userService{
 		UserDB: &userValidator{
 			UserDB: ug,
 		},
@@ -199,7 +205,7 @@ func first(db *gorm.DB, dst interface{}) error {
 	return err
 }
 
-func (us *UserService) Authenticate(email, password string) (*User, error) {
+func (us *userService) Authenticate(email, password string) (*User, error) {
 	foundUser, err := us.ByEmail(email)
 	if err != nil {
 		return nil, err
