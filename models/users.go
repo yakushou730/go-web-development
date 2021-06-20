@@ -32,7 +32,7 @@ type UserService interface {
 type UserDB interface {
 	ByID(id uint) (*User, error)
 	ByEmail(email string) (*User, error)
-	ByRemember(token string) (*User, error)
+	ByRemember(rememberHash string) (*User, error)
 	ByAge(age int) (*User, error)
 	InAgeRange(ageStart int, ageEnd int) ([]User, error)
 
@@ -47,6 +47,7 @@ type UserDB interface {
 
 type userValidator struct {
 	UserDB
+	hmac hash.HMAC
 }
 
 type userGorm struct {
@@ -87,10 +88,14 @@ func NewUserService(connectionInfo string) (UserService, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	hmac := hash.NewHMAC(hmacSecretKey)
+	uv := &userValidator{
+		hmac:   hmac,
+		UserDB: ug,
+	}
 	return &userService{
-		UserDB: &userValidator{
-			UserDB: ug,
-		},
+		UserDB: uv,
 	}, nil
 }
 
@@ -135,9 +140,8 @@ func (ug *userGorm) ByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (ug *userGorm) ByRemember(token string) (*User, error) {
+func (ug *userGorm) ByRemember(rememberHash string) (*User, error) {
 	var user User
-	rememberHash := ug.hmac.Hash(token)
 	err := first(ug.db.Where("remember_hash = ?", rememberHash), &user)
 	if err != nil {
 		return nil, err
@@ -228,4 +232,9 @@ func (uv *userValidator) ByID(id uint) (*User, error) {
 		return nil, errors.New("Invalid ID")
 	}
 	return uv.UserDB.ByID(id)
+}
+
+func (uv *userValidator) ByRemember(token string) (*User, error) {
+	rememberHash := uv.hmac.Hash(token)
+	return uv.UserDB.ByRemember(rememberHash)
 }
