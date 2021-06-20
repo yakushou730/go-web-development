@@ -8,7 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
-	"github.com/yakushou730/go-web-development/rand"
+	"github.com/yakushou730/go-web-development/hash"
 )
 
 const (
@@ -73,8 +73,11 @@ func CreateOrder(db *gorm.DB, user User, amount int, desc string) {
 // }
 
 func main() {
-	fmt.Println(rand.String(10))
-	fmt.Println(rand.RememberToken())
+	hmac := hash.NewHMAC("my-secret-key")
+	fmt.Println(hmac.Hash("this is smy string to hash"))
+
+	// fmt.Println(rand.String(10))
+	// fmt.Println(rand.RememberToken())
 
 	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 	// 	"dbname=%s sslmode=disable",
