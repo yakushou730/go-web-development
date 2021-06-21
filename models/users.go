@@ -23,10 +23,12 @@ var (
 	ErrNotFound          = errors.New("models: resource not found")
 	ErrIDINvalid         = errors.New("models: ID provided was invalid")
 	ErrPasswordIncorrect = errors.New("models: incorrect password provided")
-	ErrEmailRequired     = errors.New("models: email address is required")
-	ErrEmailInvalid      = errors.New("models: email address is not valid")
-	ErrEmailTaken        = errors.New("models: email address is already taken")
-	userPwPepper         = "secret-random-string"
+	ErrPasswordTooShort  = errors.New("models: password must" +
+		"be at least t8 characters long")
+	ErrEmailRequired = errors.New("models: email address is required")
+	ErrEmailInvalid  = errors.New("models: email address is not valid")
+	ErrEmailTaken    = errors.New("models: email address is already taken")
+	userPwPepper     = "secret-random-string"
 )
 
 type userValFn func(*User) error
@@ -232,6 +234,7 @@ func (uv *userValidator) ByRemember(token string) (*User, error) {
 
 func (uv *userValidator) Create(user *User) error {
 	err := runUserValFns(user,
+		uv.passwordMinLength,
 		uv.bcryptPassword,
 		uv.setRememberIfUnset,
 		uv.hmacRemember,
@@ -248,6 +251,7 @@ func (uv *userValidator) Create(user *User) error {
 
 func (uv *userValidator) Update(user *User) error {
 	err := runUserValFns(user,
+		uv.passwordMinLength,
 		uv.bcryptPassword,
 		uv.hmacRemember,
 		uv.normalizeEmail,
@@ -370,6 +374,16 @@ func (uv *userValidator) emailIsAvail(user *User) error {
 	}
 	if user.ID != existing.ID {
 		return ErrEmailTaken
+	}
+	return nil
+}
+
+func (uv *userValidator) passwordMinLength(user *User) error {
+	if user.Password == "" {
+		return nil
+	}
+	if len(user.Password) < 8 {
+		return ErrPasswordTooShort
 	}
 	return nil
 }
