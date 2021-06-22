@@ -20,23 +20,35 @@ const (
 )
 
 var (
-	ErrNotFound          = errors.New("models: resource not found")
-	ErrIDINvalid         = errors.New("models: ID provided was invalid")
-	ErrPasswordIncorrect = errors.New("models: incorrect password provided")
-	ErrPasswordTooShort  = errors.New("models: password must " +
-		"be at least 8 characters long")
-	ErrPasswordRequired = errors.New("models: password is required")
-	ErrEmailRequired    = errors.New("models: email address is required")
-	ErrEmailInvalid     = errors.New("models: email address is not valid")
-	ErrEmailTaken       = errors.New("models: email address is already taken")
-	ErrRememberRequired = errors.New("models: remember token " +
-		"is required")
-	ErrRememberTooShort = errors.New("models: remember token " +
-		"must be at least 32 bytes")
+	ErrNotFound          modelError = "models: resource not found"
+	ErrIDINvalid         modelError = "models: ID provided was invalid"
+	ErrPasswordIncorrect modelError = "models: incorrect password provided"
+	ErrPasswordTooShort  modelError = "models: password must " +
+		"be at least 8 characters long"
+	ErrPasswordRequired modelError = "models: password is required"
+	ErrEmailRequired    modelError = "models: email address is required"
+	ErrEmailInvalid     modelError = "models: email address is not valid"
+	ErrEmailTaken       modelError = "models: email address is already taken"
+	ErrRememberRequired modelError = "models: remember token " +
+		"is required"
+	ErrRememberTooShort modelError = "models: remember token " +
+		"must be at least 32 bytes"
 	userPwPepper = "secret-random-string"
 )
 
 type userValFn func(*User) error
+type modelError string
+
+func (e modelError) Error() string {
+	return string(e)
+}
+
+func (e modelError) Public() string {
+	s := strings.Replace(string(e), "models: ", "", 1)
+	split := strings.Split(s, " ")
+	split[0] = strings.Title(split[0])
+	return strings.Join(split, " ")
+}
 
 type UserService interface {
 	Authenticate(email, password string) (*User, error)
