@@ -65,10 +65,6 @@ type UserDB interface {
 	Create(user *User) error
 	Update(user *User) error
 	Delete(id uint) error
-
-	Close() error
-	DestructiveReset() error
-	AutoMigrate() error
 }
 
 type userValidator struct {
@@ -111,10 +107,6 @@ func newUserValidator(udb UserDB, hmac hash.HMAC) *userValidator {
 		hmac:       hmac,
 		emailRegex: regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,16}$`),
 	}
-}
-
-func (ug *userGorm) Close() error {
-	return ug.db.Close()
 }
 
 func (ug *userGorm) ByID(id uint) (*User, error) {
@@ -163,14 +155,6 @@ func (ug *userGorm) ByRemember(rememberHash string) (*User, error) {
 	return &user, nil
 }
 
-func (ug *userGorm) DestructiveReset() error {
-	err := ug.db.DropTableIfExists(&User{}).Error
-	if err != nil {
-		return err
-	}
-	return ug.AutoMigrate()
-}
-
 func (ug *userGorm) Create(user *User) error {
 	return ug.db.Create(user).Error
 }
@@ -182,13 +166,6 @@ func (ug *userGorm) Update(user *User) error {
 func (ug *userGorm) Delete(id uint) error {
 	user := User{Model: gorm.Model{ID: id}}
 	return ug.db.Delete(&user).Error
-}
-
-func (ug *userGorm) AutoMigrate() error {
-	if err := ug.db.AutoMigrate(&User{}).Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 func first(db *gorm.DB, dst interface{}) error {
