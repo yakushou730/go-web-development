@@ -36,8 +36,9 @@ func main() {
 	defer services.Close()
 	services.AutoMigrate()
 
-	usersC := controllers.NewUsers(services.User)
 	staticC := controllers.NewStatic()
+	usersC := controllers.NewUsers(services.User)
+	galleriesC := controllers.NewGalleries(services.Gallery)
 
 	r := mux.NewRouter()
 	r.Handle("/", staticC.Home).Methods(http.MethodGet)
@@ -47,7 +48,8 @@ func main() {
 	r.HandleFunc("/signup", usersC.Create).Methods(http.MethodPost)
 	r.Handle("/login", usersC.LoginView).Methods(http.MethodGet)
 	r.HandleFunc("/login", usersC.Login).Methods(http.MethodPost)
-	r.HandleFunc("/cookietest", usersC.CookieTest)
+	r.HandleFunc("/cookietest", usersC.CookieTest).Methods(http.MethodGet)
+	r.Handle("/galleries/new", galleriesC.New).Methods(http.MethodGet)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
