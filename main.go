@@ -50,6 +50,7 @@ func main() {
 	r.HandleFunc("/login", usersC.Login).Methods(http.MethodPost)
 	r.HandleFunc("/cookietest", usersC.CookieTest).Methods(http.MethodGet)
 	r.Handle("/galleries/new", galleriesC.New).Methods(http.MethodGet)
+	r.HandleFunc("/galleries", galleriesC.Create).Methods(http.MethodPost)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
