@@ -59,6 +59,7 @@ func main() {
 	r.HandleFunc("/cookietest", usersC.CookieTest).Methods(http.MethodGet)
 	r.Handle("/galleries/new", newGallery).Methods(http.MethodGet)
 	r.HandleFunc("/galleries", createGallery).Methods(http.MethodPost)
+	r.HandleFunc("/galleries/{id:[0-9]+}", galleriesC.Show).Methods(http.MethodGet)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
