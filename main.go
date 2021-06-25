@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/yakushou730/go-web-development/middleware"
+
 	"github.com/yakushou730/go-web-development/models"
 
 	"github.com/yakushou730/go-web-development/controllers"
@@ -40,6 +42,12 @@ func main() {
 	usersC := controllers.NewUsers(services.User)
 	galleriesC := controllers.NewGalleries(services.Gallery)
 
+	requireUserMw := middleware.RequireUser{
+		UserService: services.User,
+	}
+	newGallery := requireUserMw.Apply(galleriesC.New)
+	createGallery := requireUserMw.ApplyFn(galleriesC.Create)
+
 	r := mux.NewRouter()
 	r.Handle("/", staticC.Home).Methods(http.MethodGet)
 	r.Handle("/contact", staticC.Contact).Methods(http.MethodGet)
@@ -49,8 +57,8 @@ func main() {
 	r.Handle("/login", usersC.LoginView).Methods(http.MethodGet)
 	r.HandleFunc("/login", usersC.Login).Methods(http.MethodPost)
 	r.HandleFunc("/cookietest", usersC.CookieTest).Methods(http.MethodGet)
-	r.Handle("/galleries/new", galleriesC.New).Methods(http.MethodGet)
-	r.HandleFunc("/galleries", galleriesC.Create).Methods(http.MethodPost)
+	r.Handle("/galleries/new", newGallery).Methods(http.MethodGet)
+	r.HandleFunc("/galleries", createGallery).Methods(http.MethodPost)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
