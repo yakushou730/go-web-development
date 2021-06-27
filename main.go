@@ -62,12 +62,13 @@ func main() {
 	r.HandleFunc("/galleries/{id:[0-9]+}", galleriesC.Show).Methods(http.MethodGet).
 		Name(controllers.ShowGallery)
 	r.HandleFunc("/galleries/{id:[0-9]+}/edit", requireUserMw.ApplyFn(galleriesC.Edit)).
-		Methods(http.MethodGet)
+		Methods(http.MethodGet).Name(controllers.EditGallery)
 	r.HandleFunc("/galleries/{id:[0-9]+}/update", requireUserMw.ApplyFn(galleriesC.Update)).
 		Methods(http.MethodPost)
 	r.HandleFunc("/galleries/{id:[0-9]+}/delete", requireUserMw.ApplyFn(galleriesC.Delete)).
 		Methods(http.MethodPost)
-	r.HandleFunc("/galleries", requireUserMw.ApplyFn(galleriesC.Index)).Methods(http.MethodGet)
+	r.HandleFunc("/galleries", requireUserMw.ApplyFn(galleriesC.Index)).
+		Methods(http.MethodGet).Name(controllers.IndexGalleries)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
