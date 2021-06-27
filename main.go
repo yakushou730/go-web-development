@@ -43,9 +43,11 @@ func main() {
 	usersC := controllers.NewUsers(services.User)
 	galleriesC := controllers.NewGalleries(services.Gallery, r)
 
-	requireUserMw := middleware.RequireUser{
+	userMw := middleware.User{
 		UserService: services.User,
 	}
+	requireUserMw := middleware.RequireUser{}
+
 	newGallery := requireUserMw.Apply(galleriesC.New)
 	createGallery := requireUserMw.ApplyFn(galleriesC.Create)
 
@@ -73,5 +75,5 @@ func main() {
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
 
-	http.ListenAndServe(":3000", r)
+	http.ListenAndServe(":3000", userMw.Apply(r))
 }

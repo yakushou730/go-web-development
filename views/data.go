@@ -1,6 +1,10 @@
 package views
 
-import "log"
+import (
+	"log"
+
+	"github.com/yakushou730/go-web-development/models"
+)
 
 const (
 	AlertLvlError   = "danger"
@@ -13,6 +17,7 @@ const (
 
 type Data struct {
 	Alert *Alert
+	User  *models.User
 	Yield interface{}
 }
 
