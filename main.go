@@ -67,6 +67,7 @@ func main() {
 		Methods(http.MethodPost)
 	r.HandleFunc("/galleries/{id:[0-9]+}/delete", requireUserMw.ApplyFn(galleriesC.Delete)).
 		Methods(http.MethodPost)
+	r.HandleFunc("/galleries", requireUserMw.ApplyFn(galleriesC.Index)).Methods(http.MethodGet)
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
