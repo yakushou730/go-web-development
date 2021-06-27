@@ -113,9 +113,14 @@ func (g *Galleries) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	gallery.Title = form.Title
-	vd.Alert = &views.Alert{
-		Level:   views.AlertLvlSuccess,
-		Message: "gallery updated successfully!",
+	err = g.gs.Update(gallery)
+	if err != nil {
+		vd.SetAlert(err)
+	} else {
+		vd.Alert = &views.Alert{
+			Level:   views.AlertLvlSuccess,
+			Message: "gallery updated successfully!",
+		}
 	}
 	g.EditView.Render(w, vd)
 }
