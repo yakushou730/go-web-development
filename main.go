@@ -74,6 +74,9 @@ func main() {
 	r.HandleFunc("/galleries/{id:[0-9]+}/images", requireUserMw.ApplyFn(galleriesC.ImageUpload)).
 		Methods(http.MethodPost)
 
+	imageHandler := http.FileServer(http.Dir("./images/"))
+	r.PathPrefix("/images/").Handler(http.StripPrefix("/images/", imageHandler))
+
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
 
