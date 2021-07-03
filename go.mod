@@ -3,6 +3,7 @@ module github.com/yakushou730/go-web-development
 go 1.16
 
 require (
+	github.com/gorilla/csrf v1.7.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/howeyc/fsnotify v0.9.0 // indirect

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/csrf"
+	"github.com/yakushou730/go-web-development/rand"
+
 	"github.com/yakushou730/go-web-development/middleware"
 
 	"github.com/yakushou730/go-web-development/models"
@@ -48,6 +51,13 @@ func main() {
 	}
 	requireUserMw := middleware.RequireUser{}
 
+	isProd := false
+	b, err := rand.Bytes(32)
+	if err != nil {
+		panic(err)
+	}
+	csrfMw := csrf.Protect(b, csrf.Secure(isProd))
+
 	newGallery := requireUserMw.Apply(galleriesC.New)
 	createGallery := requireUserMw.ApplyFn(galleriesC.Create)
 
@@ -86,5 +96,5 @@ func main() {
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
 
-	http.ListenAndServe(":3000", userMw.Apply(r))
+	http.ListenAndServe(":3000", csrfMw(userMw.Apply(r)))
 }
