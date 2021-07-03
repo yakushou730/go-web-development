@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 
@@ -30,8 +31,13 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	cfg := DefaultConfig()
-	dbCfg := DefaultPostgresConfig()
+	boolPtr := flag.Bool("prod", false, "Provide this flag "+
+		"in production. This ensures that a .config file is "+
+		"provided before the application starts.")
+	flag.Parse()
+
+	cfg := LoadConfig(*boolPtr)
+	dbCfg := cfg.Database
 
 	services, err := models.NewServices(
 		models.WithGorm(dbCfg.Dialect(), dbCfg.ConnectionInfo()),
