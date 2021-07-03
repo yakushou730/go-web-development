@@ -30,10 +30,10 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"dbname=%s sslmode=disable",
-		host, port, user, dbname)
-	services, err := models.NewServices(psqlInfo)
+	cfg := DefaultConfig()
+	dbCfg := DefaultPostgresConfig()
+
+	services, err := models.NewServices(dbCfg.Dialect(), dbCfg.ConnectionInfo())
 
 	if err != nil {
 		panic(err)
@@ -51,12 +51,11 @@ func main() {
 	}
 	requireUserMw := middleware.RequireUser{}
 
-	isProd := false
 	b, err := rand.Bytes(32)
 	if err != nil {
 		panic(err)
 	}
-	csrfMw := csrf.Protect(b, csrf.Secure(isProd))
+	csrfMw := csrf.Protect(b, csrf.Secure(cfg.IsProd()))
 
 	newGallery := requireUserMw.Apply(galleriesC.New)
 	createGallery := requireUserMw.ApplyFn(galleriesC.Create)
@@ -96,5 +95,6 @@ func main() {
 	var h http.Handler = http.HandlerFunc(notFound)
 	r.NotFoundHandler = h
 
-	http.ListenAndServe(":3000", csrfMw(userMw.Apply(r)))
+	fmt.Printf("Starting the server on :%d...\n", cfg.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), csrfMw(userMw.Apply(r)))
 }
